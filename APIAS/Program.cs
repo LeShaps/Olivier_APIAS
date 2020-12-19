@@ -44,12 +44,15 @@ namespace APIAS
             await Loggers.LogEventAsync(new LogMessage(LogSeverity.Info, "Initialisation...", "Stating APIAS")).ConfigureAwait(false);
 
             Globals.InitConfig();
+            await Globals.Db.InitAsync();
 
             await Loggers.LogEventAsync(new LogMessage(LogSeverity.Info, "Setup", "Initializing Modules...")).ConfigureAwait(false);
 
             await commands.AddModuleAsync<CommunicationModule>(null);
 
             Client.MessageReceived += HandleMessageAsync;
+            Client.JoinedGuild += InitGuildAsync;
+            Client.GuildAvailable += InitGuildAsync;
 
             commands.Log += Loggers.LogEventAsync;
 
@@ -57,6 +60,11 @@ namespace APIAS
             await Client.StartAsync();
 
             await Task.Delay(-1).ConfigureAwait(false);
+        }
+
+        private async Task InitGuildAsync(SocketGuild arg)
+        {
+            await Globals.Db.InitGuildAsync(arg);
         }
 
         private async Task HandleMessageAsync(SocketMessage arg)

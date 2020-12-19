@@ -1,15 +1,19 @@
-﻿using Newtonsoft.Json;
+﻿using APIAS.Db;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace APIAS.Data
 {
     class Globals
     {
         public static string BotToken { get; private set; }
+
+        public static DbSystem Db = new DbSystem();
 
         public static void InitConfig()
         {
