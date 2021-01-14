@@ -39,7 +39,29 @@ namespace APIAS
             List<AFollow> YTFollows = Globals.ActiveFollows.Where(follow => follow.GuildID == Context.Guild.Id.ToString() &&
                                                                     follow.Type == FollowType.Youtube).ToList();
 
+            if (YTFollows.Count == 0) {
+                await ReplyAsync("You don't have any youtube subscription on this server");
+                return;
+            }
             await ReplyAsync("Here's a list of your current Youtube subscriptions on this server", false, FollowListBuilder(YTFollows));
+        }
+
+        [Command("Stop following")]
+        public async Task StopFollow([Remainder]string ChannelName)
+        {
+            List<AFollow> YTFollows = Globals.ActiveFollows.Where(follow => follow.GuildID == Context.Guild.Id.ToString() &&
+                                                                    follow.Type == FollowType.Youtube).ToList();
+
+            foreach (AFollow follow in YTFollows)
+            {
+                if (((YTFollow)follow).ChannelName == ChannelName) {
+                    await follow.RemoveSubscription();
+                    await ReplyAsync($"You've successfully unfollowed {ChannelName}!");
+                    return;
+                }
+            }
+
+            await ReplyAsync("You're not following any channel with this name");
         }
 
 #if DEBUG

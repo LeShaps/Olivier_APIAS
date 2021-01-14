@@ -22,7 +22,9 @@ namespace APIAS
         private Embed MakeHelp()
         {
             string Description = "**Follows**\nSetup YT Follow - Setup a youtube follow on this server\n" +
-                "Cancel Setup - End a current configuration that you make";
+                "Cancel Setup - End a current configuration that you make\n" +
+                "List YT Follows - List all the youtube channels you're currently following\n" +
+                "Stop following - Stop following a Youtube channel";
 
             EmbedBuilder builder = new EmbedBuilder
             {

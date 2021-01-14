@@ -64,6 +64,14 @@ namespace APIAS.Db
             }
         }
 
+        public async Task RemoveFollow(AFollow follow, string GuildID)
+        {
+            JObject GuildObject = await R1.Db(_dbName).Table(_guildTableName).Get(GuildID).RunAsync<JObject>(_conn);
+            Server Guild = new Server(GuildObject);
+            Guild.Follows.Remove(follow);
+            await R1.Db(_dbName).Table(_guildTableName).Update(Guild).RunAsync(_conn);
+        }
+
         public async Task GetGuildAysnc(string GuildID)
         {
             JObject GuildObject = await R1.Db(_dbName).Table(_guildTableName).Get(GuildID).RunAsync<JObject>(_conn);

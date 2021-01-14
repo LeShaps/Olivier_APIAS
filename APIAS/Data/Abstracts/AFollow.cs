@@ -86,6 +86,9 @@ namespace APIAS.Abstracts
             }
         }
 
+        /// <summary>
+        /// Initialize the timer
+        /// </summary>
         public void InitTimer()
         {
             _updateRoutineTimer = new Timer(new TimerCallback(CheckUpdate), null, 0, RefreshTime);
@@ -117,6 +120,12 @@ namespace APIAS.Abstracts
             };
 
             await _message.ModifyAsync(x => x.Embed = CancelEmbed.Build());
+        }
+
+        public async Task RemoveSubscription()
+        {
+            Globals.ActiveFollows.Remove(this);
+            await Globals.Db.RemoveFollow(this, GuildID);
         }
 
         /// <summary>
