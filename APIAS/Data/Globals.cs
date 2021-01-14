@@ -1,19 +1,29 @@
-﻿using APIAS.Db;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+﻿using Discord;
+using Discord.WebSocket;
+
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
-using System.Threading.Tasks;
+
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
+using APIAS.Db;
+using APIAS.Abstracts;
 
 namespace APIAS.Data
 {
     class Globals
     {
         public static string BotToken { get; private set; }
+        public static IUser CurrentBot;
+
+        public static DiscordSocketClient Client;
 
         public static DbSystem Db = new DbSystem();
+
+        public static List<AFollow> InConfigFollows = new List<AFollow>();
+        public static List<AFollow> ActiveFollows = new List<AFollow>();
 
         public static void InitConfig()
         {
@@ -25,5 +35,14 @@ namespace APIAS.Data
 
             BotToken = ConfigurationJson.Value<string>("botToken");
         }
+    }
+
+    delegate void ConfigurationUpdater(IMessage Message);
+
+    [Serializable]
+    public enum FollowType
+    {
+        Youtube,
+        Itch
     }
 }

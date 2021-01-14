@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using APIAS.Abstracts;
+using APIAS.Data;
 using Discord;
+using Newtonsoft.Json.Linq;
 using RethinkDb.Driver;
 using RethinkDb.Driver.Net;
 
@@ -44,11 +47,26 @@ namespace APIAS.Db
                 {
                     id = GuildID,
                     ServerName = guild.Name,
-                    YTFollows = new List<YTFollow>()
+                    Follows = new List<AFollow>()
                 };
 
                 await R1.Db(_dbName).Table(_guildTableName).Insert(server).RunAsync(_conn);
             }
+        }
+
+        public async Task GetGuildAysnc(string GuildID)
+        {
+            JObject GuildObject = await R1.Db(_dbName).Table(_guildTableName).Get(GuildID).RunAsync<JObject>(_conn);
+            Server Guild = new Server(GuildObject);
+            Globals.ActiveFollows.AddRange(Guild.Follows);
+        }
+
+        public async Task AddFollowToGuild(AFollow Follow, string GuildID)
+        {
+            JObject GuildObject = await R1.Db(_dbName).Table(_guildTableName).Get(GuildID).RunAsync<JObject>(_conn);
+            Server Guild = new Server(GuildObject);
+            Guild.Follows.Add(Follow);
+            await R1.Db(_dbName).Table(_guildTableName).Update(Guild).RunAsync(_conn);
         }
     }
 }
