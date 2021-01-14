@@ -57,15 +57,20 @@ namespace APIAS
             Globals.Client.ReactionAdded += CheckConfigReaction;
             Globals.Client.JoinedGuild += InitGuildAsync;
             Globals.Client.GuildAvailable += InitGuildAsync;
+            Globals.Client.Connected += InitFollowsAsync;
 
             commands.Log += Loggers.LogEventAsync;
+
 
             await Globals.Client.LoginAsync(TokenType.Bot, Globals.BotToken);
             await Globals.Client.StartAsync();
 
-            Globals.CurrentBot = Globals.Client.CurrentUser;
-
             await Task.Delay(-1).ConfigureAwait(false);
+        }
+
+        private async Task InitFollowsAsync()
+        {
+            await Globals.Db.FetchGuilds();
         }
 
         private async Task CheckConfigReaction(Cacheable<IUserMessage, ulong> Message, ISocketMessageChannel Channel, SocketReaction Reaction)

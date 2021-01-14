@@ -16,7 +16,6 @@ namespace APIAS.Data
     class Globals
     {
         public static string BotToken { get; private set; }
-        public static IUser CurrentBot;
 
         public static DiscordSocketClient Client;
 

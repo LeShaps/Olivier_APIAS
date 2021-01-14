@@ -54,6 +54,16 @@ namespace APIAS.Db
             }
         }
 
+        public async Task FetchGuilds()
+        {
+            var AllGuilds = await R1.Db(_dbName).Table(_guildTableName).RunAsync<JObject>(_conn);
+            foreach (JObject guild in AllGuilds.BufferedItems)
+            {
+                Server Temp = new Server(guild);
+                Globals.ActiveFollows.AddRange(Temp.Follows);
+            }
+        }
+
         public async Task GetGuildAysnc(string GuildID)
         {
             JObject GuildObject = await R1.Db(_dbName).Table(_guildTableName).Get(GuildID).RunAsync<JObject>(_conn);

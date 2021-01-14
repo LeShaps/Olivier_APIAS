@@ -36,7 +36,7 @@ namespace APIAS.Db
         public string LastVideoDescription;
         public string LastVideoUrl;
 
-        public string RssAdress { get; private set; }
+        public string RssAdress;
 
         /* Initial configuration and update */
         private Regex _thumbnailRegex = new Regex("media:thumbnail url=\"([^\"]+)");
