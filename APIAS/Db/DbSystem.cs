@@ -60,7 +60,7 @@ namespace APIAS.Db
             foreach (JObject guild in AllGuilds.BufferedItems)
             {
                 Server Temp = new Server(guild);
-                Globals.ActiveFollows.AddRange(Temp.Follows);
+                AddToActives(Temp.Follows);
             }
         }
 
@@ -76,7 +76,7 @@ namespace APIAS.Db
         {
             JObject GuildObject = await R1.Db(_dbName).Table(_guildTableName).Get(GuildID).RunAsync<JObject>(_conn);
             Server Guild = new Server(GuildObject);
-            Globals.ActiveFollows.AddRange(Guild.Follows);
+            AddToActives(Guild.Follows);
         }
 
         public async Task AddFollowToGuild(AFollow Follow, string GuildID)
@@ -85,6 +85,16 @@ namespace APIAS.Db
             Server Guild = new Server(GuildObject);
             Guild.Follows.Add(Follow);
             await R1.Db(_dbName).Table(_guildTableName).Update(Guild).RunAsync(_conn);
+        }
+
+        private void AddToActives(List<AFollow> list)
+        {
+            foreach (AFollow follow in list)
+            {
+                if (!Globals.ActiveFollows.Contains(follow)) {
+                    Globals.ActiveFollows.Add(follow);
+                }
+            }
         }
     }
 }

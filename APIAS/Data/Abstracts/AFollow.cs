@@ -24,6 +24,7 @@ namespace APIAS.Abstracts
         public IReaction PendingReaction { set => _pendingReaction = value; }
         public List<string> MentionChannels { get => GetMentionChannels(); set => SetMensionChannels(value); }
         public List<string> MentionRoles { get => GetMentionRoles(); set => SetMentionRoles(value); }
+        public string CreatorUserID { get => _configUserID.ToString(); set => _configUserID = ulong.Parse(value); }
 
         /* Behaviour */
         public FollowType Type;
