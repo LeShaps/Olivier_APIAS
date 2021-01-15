@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using APIAS.Data;
 using APIAS.Utilities;
 using APIAS.Abstracts;
+using System;
 
 namespace APIAS
 {
@@ -32,10 +33,11 @@ namespace APIAS
             {
                 await new Program().MainAsync().ConfigureAwait(false);
             }
-            catch
+            catch(Exception e)
             {
                 if (Debugger.IsAttached)
                     throw;
+                Console.WriteLine(e.Message);
             }
 
         }
@@ -57,7 +59,7 @@ namespace APIAS
             Globals.Client.ReactionAdded += CheckConfigReaction;
             Globals.Client.JoinedGuild += InitGuildAsync;
             Globals.Client.GuildAvailable += InitGuildAsync;
-            Globals.Client.Connected += InitFollowsAsync;
+            Globals.Client.Ready += InitFollowsAsync;
 
             commands.Log += Loggers.LogEventAsync;
 

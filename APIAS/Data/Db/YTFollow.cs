@@ -67,24 +67,26 @@ namespace APIAS.Db
         /* Implementation */
         public override async void CheckUpdate(object? obj)
         {
+            await Loggers.LogEventAsync(new LogMessage(LogSeverity.Debug, "YTFollow", "Enter new check update loop"));
             string RSSToRead = new WebClient().DownloadString(RssAdress);
             using var Reader = XmlReader.Create(new StringReader(RSSToRead));
 
             SyndicationFeed feed = SyndicationFeed.Load(Reader);
             var post = feed.Items.FirstOrDefault();
 
+            await Loggers.LogEventAsync(new LogMessage(LogSeverity.Debug, "YTFollow", $"Old date: {LastPublicationDate}{Environment.NewLine}New date: {post.PublishDate.DateTime}"));
             if (!_isConfigFinished)
             {
                 SetNewVideoInfos(post, RSSToRead);
+                await Loggers.LogEventAsync( new LogMessage(LogSeverity.Debug, "YTFollow", $"Found new videos informations, like {LastKnownVideo} while in config"));
                 return;
             }
-            else if (LastPublicationDate.CompareTo(post.PublishDate.DateTime) < 0)
+            if (LastPublicationDate.CompareTo(post.PublishDate.DateTime) < 0)
             {
+                await Loggers.LogEventAsync(new LogMessage(LogSeverity.Debug, "YTFollow", "Found new videos informations while in DB fetched"));
                 SetNewVideoInfos(post, RSSToRead);
                 await SendUpdateMessage();
             }
-            else
-                return;
         }
 
         public override async Task SendUpdateMessage()
@@ -105,9 +107,9 @@ namespace APIAS.Db
                 Title = LastKnownVideo
             };
 
-            foreach (IGuildChannel chan in _mensionChannels)
+            foreach (ITextChannel chan in _mensionChannels)
             {
-                await ((ITextChannel)chan).SendMessageAsync(Mentions, false, NewVideoEmbed.Build());
+                await chan.SendMessageAsync(Mentions, false, NewVideoEmbed.Build());
             }
         }
 
@@ -183,7 +185,7 @@ namespace APIAS.Db
                 $"2. Every 12 hours\n" +
                 $"3. Every 6 hours\n" +
                 $"4. Every hour\n" +
-                $"5. Every 10 minutes\n" +
+                $"5. Every minute\n" +
                 $"6. Custom\n\nNote: this doesn't have any consequences for the moment";
 
             await _message.ModifyAsync(x => x.Embed = UpdateBuilder.Build());
@@ -199,7 +201,7 @@ namespace APIAS.Db
                 "2️⃣" => 12 * ((1000 * 60) * 60),
                 "3️⃣" => 6 * ((1000 * 60) * 60),
                 "4️⃣" => ((1000 * 60) * 60),
-                "5️⃣" => 600000,
+                "5️⃣" => 60000,
                 _ => 24 * ((1000 * 60) * 60)
             };
             _updateRoutineTimer = new Timer(new TimerCallback(CheckUpdate), null, 0, RefreshTime);
@@ -218,7 +220,7 @@ namespace APIAS.Db
             EmbedBuilder UpdateBuilder = _message.Embeds.First().ToEmbedBuilder();
 
             foreach (ulong Chan in MessageContext.MentionedChannelIds) {
-                _mensionChannels.Add(await _configurationGuild.GetChannelAsync(Chan));
+                _mensionChannels.Add((ITextChannel)await _configurationGuild.GetChannelAsync(Chan));
             }
 
             if (_mensionChannels.Count < 1) {

@@ -24,6 +24,8 @@ namespace APIAS.Data
         public static List<AFollow> InConfigFollows = new List<AFollow>();
         public static List<AFollow> ActiveFollows = new List<AFollow>();
 
+        public static string DebugWebhookUrl { get; private set; }
+
         public static void InitConfig()
         {
             if (!File.Exists("Loggers/Credentials.json"))
@@ -33,6 +35,9 @@ namespace APIAS.Data
                 throw new FileNotFoundException("Missing critical informations in Credentials.json, please complete mandatory informations before continuing");
 
             BotToken = ConfigurationJson.Value<string>("botToken");
+#if DEBUG
+            DebugWebhookUrl = ConfigurationJson.Value<string>("DebugWebhookUrl");
+#endif
         }
     }
 

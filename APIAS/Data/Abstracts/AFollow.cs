@@ -32,7 +32,7 @@ namespace APIAS.Abstracts
         public string GuildID;
         protected Timer _updateRoutineTimer;
         protected List<ulong> _mensionRoles = new List<ulong>();
-        protected List<IGuildChannel> _mensionChannels = new List<IGuildChannel>();
+        protected List<ITextChannel> _mensionChannels = new List<ITextChannel>();
 
         /* Getters & Setters */
         public ulong ConfigUserID()
@@ -70,17 +70,16 @@ namespace APIAS.Abstracts
 
         public async void SetMensionChannels(List<string> Channels)
         {
-            Console.WriteLine("Enter channel add");
             IGuild guild = Globals.Client.GetGuild(ulong.Parse(GuildID));
             foreach (string chanId in Channels)
             {
-                _mensionChannels.Add(await guild.GetChannelAsync(ulong.Parse(chanId)));
+                ITextChannel Channel = await guild.GetTextChannelAsync(ulong.Parse(chanId));
+                _mensionChannels.Add(Channel);
             }
         }
 
         public void SetMentionRoles(List<string> Roles)
         {
-            Console.WriteLine("Enter roles add");
             foreach (string role in Roles)
             {
                 _mensionRoles.Add(ulong.Parse(role));
@@ -92,6 +91,7 @@ namespace APIAS.Abstracts
         /// </summary>
         public void InitTimer()
         {
+            _isConfigFinished = true;
             _updateRoutineTimer = new Timer(new TimerCallback(CheckUpdate), null, 0, RefreshTime);
         }
 
