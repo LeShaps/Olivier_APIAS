@@ -11,5 +11,10 @@
 
             return ToClean;
         }
+
+        public static bool IsNullOrEmpty(this string ToTest)
+        {
+            return ToTest == null || ToTest == "";
+        }
     }
 }

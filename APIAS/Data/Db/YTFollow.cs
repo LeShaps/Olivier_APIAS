@@ -146,7 +146,7 @@ namespace APIAS.Db
                 new EmbedFieldBuilder
                 {
                     Name = "Description",
-                    Value = ChannelDescription,
+                    Value = ChannelDescription.IsNullOrEmpty() ? "[No description found for this channel]" : ChannelDescription,
                     IsInline = false
                 }
             };
@@ -222,7 +222,7 @@ namespace APIAS.Db
                 _mensionChannels.Add((ITextChannel)await _configurationGuild.GetChannelAsync(Chan));
             }
 
-            if (_mensionChannels.Count < 1) {
+            if (_mensionChannels.Count < 1 && !UpdateBuilder.Description.Contains("Please have at least one channel to receive the updates")) {
                 UpdateBuilder.Description = $"{UpdateBuilder.Description}\n\nPlease have at least one channel to receive the updates";
                 await _message.ModifyAsync(x => x.Embed = UpdateBuilder.Build());
                 return;
@@ -245,6 +245,10 @@ namespace APIAS.Db
             UpdateBuilder.Description = "Configuration finished";
             UpdateBuilder.Footer = null;
 
+            foreach (ITextChannel followchan in _mensionChannels)
+            {
+                await followchan.SendMessageAsync($"{followchan.Name} will now receive the updates for {ChannelName}");
+            }
 
             await _message.ModifyAsync(x => x.Embed = UpdateBuilder.Build());
             _isConfigFinished = true;
@@ -277,7 +281,7 @@ namespace APIAS.Db
 
         private JObject SplitYTJson(string Link)
         {
-            Regex reg = new Regex("ytInitialData = ([^;]+)");
+            Regex reg = new Regex("ytInitialData = (.*?);</script");
             string YTPage = null;
 
             using (WebClient wc = new WebClient())
@@ -287,8 +291,10 @@ namespace APIAS.Db
 
             if (YTPage == null)
                 return null;
-            if (reg.Match(YTPage).Success)
+
+            if (reg.Match(YTPage).Success) {
                 return JsonConvert.DeserializeObject<JObject>(reg.Match(YTPage).Groups[1].Value);
+            }
 
             return null;
         }
