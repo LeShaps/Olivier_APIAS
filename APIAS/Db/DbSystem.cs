@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using APIAS.Abstracts;
@@ -8,6 +9,7 @@ using Discord;
 using Newtonsoft.Json.Linq;
 using RethinkDb.Driver;
 using RethinkDb.Driver.Net;
+using APIAS.Extensions;
 
 namespace APIAS.Db
 {
@@ -83,7 +85,16 @@ namespace APIAS.Db
         {
             JObject GuildObject = await R1.Db(_dbName).Table(_guildTableName).Get(GuildID).RunAsync<JObject>(_conn);
             Server Guild = new Server(GuildObject);
-            Guild.Follows.Add(Follow);
+            Guild.Follows.AddUnique(Follow);
+            await R1.Db(_dbName).Table(_guildTableName).Update(Guild).RunAsync(_conn);
+        }
+
+        public async Task UpdateFollow(AFollow Follow)
+        {
+            JObject GuildObject = await R1.Db(_dbName).Table(_guildTableName).Get(Follow.GuildID).RunAsync<JObject>(_conn);
+            Server Guild = new Server(GuildObject);
+            Guild.Follows.Remove(Guild.Follows.Where(x => x.FollowDbName == Follow.FollowDbName).FirstOrDefault());
+            Guild.Follows.AddUnique(Follow);
             await R1.Db(_dbName).Table(_guildTableName).Update(Guild).RunAsync(_conn);
         }
 
@@ -91,9 +102,8 @@ namespace APIAS.Db
         {
             foreach (AFollow follow in list)
             {
-                if (!Globals.ActiveFollows.Contains(follow)) {
-                    Globals.ActiveFollows.Add(follow);
-                }
+                follow.InitTimer();
+                Globals.ActiveFollows.AddUnique(follow);
             }
         }
     }

@@ -2,6 +2,7 @@
 using Discord.Commands;
 using Discord.WebSocket;
 
+using System;
 using System.Linq;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -9,7 +10,6 @@ using System.Threading.Tasks;
 using APIAS.Data;
 using APIAS.Utilities;
 using APIAS.Abstracts;
-using System;
 
 namespace APIAS
 {

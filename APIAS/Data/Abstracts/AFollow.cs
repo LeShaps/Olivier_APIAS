@@ -9,7 +9,7 @@ using APIAS.Data;
 
 namespace APIAS.Abstracts
 {
-    abstract class AFollow
+    abstract class AFollow : IEquatable<AFollow>
     {
         /* Configuration by message */
         protected ulong _configUserID;
@@ -30,6 +30,8 @@ namespace APIAS.Abstracts
         public FollowType Type;
         public int RefreshTime;
         public string GuildID;
+        public string FollowPublicName;
+        public string FollowDbName;
         protected Timer _updateRoutineTimer;
         protected List<ulong> _mensionRoles = new List<ulong>();
         protected List<ITextChannel> _mensionChannels = new List<ITextChannel>();
@@ -140,5 +142,11 @@ namespace APIAS.Abstracts
         /// </summary>
         /// <returns></returns>
         public abstract Task SendUpdateMessage();
+
+        /* Implementation of the IEquatable interface */
+        bool IEquatable<AFollow>.Equals(AFollow other)
+        {
+            return FollowDbName == other.FollowDbName;
+        }
     }
 }

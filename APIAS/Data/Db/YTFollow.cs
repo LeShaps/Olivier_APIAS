@@ -18,6 +18,7 @@ using Newtonsoft.Json;
 using APIAS.Data;
 using APIAS.Utilities;
 using APIAS.Abstracts;
+using APIAS.Extensions;
 
 namespace APIAS.Db
 {
@@ -67,25 +68,22 @@ namespace APIAS.Db
         /* Implementation */
         public override async void CheckUpdate(object? obj)
         {
-            await Loggers.LogEventAsync(new LogMessage(LogSeverity.Debug, "YTFollow", "Enter new check update loop"));
             string RSSToRead = new WebClient().DownloadString(RssAdress);
             using var Reader = XmlReader.Create(new StringReader(RSSToRead));
 
             SyndicationFeed feed = SyndicationFeed.Load(Reader);
             var post = feed.Items.FirstOrDefault();
 
-            await Loggers.LogEventAsync(new LogMessage(LogSeverity.Debug, "YTFollow", $"Old date: {LastPublicationDate}{Environment.NewLine}New date: {post.PublishDate.DateTime}"));
             if (!_isConfigFinished)
             {
                 SetNewVideoInfos(post, RSSToRead);
-                await Loggers.LogEventAsync( new LogMessage(LogSeverity.Debug, "YTFollow", $"Found new videos informations, like {LastKnownVideo} while in config"));
                 return;
             }
             if (LastPublicationDate.CompareTo(post.PublishDate.DateTime) < 0)
             {
-                await Loggers.LogEventAsync(new LogMessage(LogSeverity.Debug, "YTFollow", "Found new videos informations while in DB fetched"));
                 SetNewVideoInfos(post, RSSToRead);
                 await SendUpdateMessage();
+                await Globals.Db.UpdateFollow(this);
             }
         }
 
@@ -179,7 +177,8 @@ namespace APIAS.Db
                 return;
             }
 
-
+            FollowPublicName = ChannelName;
+            FollowDbName = ChannelUrl;
             UpdateBuilder.Title = "Setting up now frequency";
             UpdateBuilder.Description = $"At which frequency do you want to check the channel?\n1. Every day\n" +
                 $"2. Every 12 hours\n" +
@@ -249,7 +248,7 @@ namespace APIAS.Db
 
             await _message.ModifyAsync(x => x.Embed = UpdateBuilder.Build());
             _isConfigFinished = true;
-            Globals.ActiveFollows.Add(this);
+            Globals.ActiveFollows.AddUnique(this);
             Globals.InConfigFollows.Remove(this);
             string GID = (MessageContext.Channel as ITextChannel).GuildId.ToString();
             await Globals.Db.AddFollowToGuild(this, GID);

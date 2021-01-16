@@ -48,8 +48,14 @@ namespace APIAS.Db
 
                 NewFollow.SetMensionChannels(element.Value<JArray>("MentionChannels").ToObject<List<string>>());
                 NewFollow.SetMentionRoles(element.Value<JArray>("MentionRoles").ToObject<List<string>>());
-                NewFollow.InitTimer();
                 Follows.Add(NewFollow);
+            }
+        }
+
+        public void InitForUse()
+        {
+            foreach (AFollow f in Follows) {
+                f.InitTimer();
             }
         }
     }

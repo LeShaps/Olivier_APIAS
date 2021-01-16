@@ -70,6 +70,13 @@ namespace APIAS
         {
             await Globals.Db.GetGuildAysnc(Context.Guild.Id.ToString());
         }
+
+        [Command("Deb")]
+        public async Task DebugWithAll()
+        {
+            var c = Globals.ActiveFollows;
+            return;
+        }
 #endif
 
         private Embed FollowListBuilder(List<AFollow> follows)
