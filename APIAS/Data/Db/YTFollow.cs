@@ -39,6 +39,8 @@ namespace APIAS.Db
 
         public string RssAdress;
 
+        private string _lastPublishID;
+
         /* Initial configuration and update */
         private Regex _thumbnailRegex = new Regex("media:thumbnail url=\"([^\"]+)");
         private Regex _descriptionRegex = new Regex("media:description>([^<]+)");
@@ -79,9 +81,10 @@ namespace APIAS.Db
                 SetNewVideoInfos(post, RSSToRead);
                 return;
             }
-            if (LastPublicationDate.CompareTo(post.PublishDate.DateTime) < 0)
+            if (LastPublicationDate.CompareTo(post.PublishDate.DateTime) < 0 && post.Id != _lastPublishID)
             {
                 SetNewVideoInfos(post, RSSToRead);
+                _lastPublishID = post.Id;
                 await SendUpdateMessage();
                 await Globals.Db.UpdateFollow(this);
             }
@@ -101,7 +104,6 @@ namespace APIAS.Db
                 Color = Color.Red,
                 ImageUrl = LastVideoIconUrl,
                 Url = LastVideoUrl,
-                Description = LastVideoDescription,
                 Title = LastKnownVideo
             };
 
@@ -184,7 +186,7 @@ namespace APIAS.Db
                 $"2. Every 12 hours\n" +
                 $"3. Every 6 hours\n" +
                 $"4. Every hour\n" +
-                $"5. Every minute\n" +
+                $"5. Every 10 minutes\n" +
                 $"6. Custom\n\nNote: this doesn't have any consequences for the moment";
 
             await _message.ModifyAsync(x => x.Embed = UpdateBuilder.Build());
@@ -200,7 +202,7 @@ namespace APIAS.Db
                 "2️⃣" => 12 * ((1000 * 60) * 60),
                 "3️⃣" => 6 * ((1000 * 60) * 60),
                 "4️⃣" => ((1000 * 60) * 60),
-                "5️⃣" => 60000,
+                "5️⃣" => 600000,
                 _ => 24 * ((1000 * 60) * 60)
             };
             _updateRoutineTimer = new Timer(new TimerCallback(CheckUpdate), null, 0, RefreshTime);
