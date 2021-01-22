@@ -61,8 +61,13 @@ namespace APIAS.Db
             Cursor<JObject> AllGuilds = await R1.Db(_dbName).Table(_guildTableName).RunAsync<JObject>(_conn);
             foreach (JObject guild in AllGuilds)
             {
-                Server Temp = _servers[guild["id"].Value<string>()];
-                AddToActives(Temp.Follows);
+                var id = guild["id"].Value<string>();
+                if (!_servers.ContainsKey(id))
+                {
+                    var server = new Server(guild);
+                    _servers.Add(id, server);
+                    AddToActives(server.Follows);
+                }
             }
         }
 
