@@ -58,8 +58,8 @@ namespace APIAS.Db
 
         public async Task FetchGuildsAsync()
         {
-            var AllGuilds = await R1.Db(_dbName).Table(_guildTableName).RunAsync<JObject>(_conn);
-            foreach (JObject guild in AllGuilds.BufferedItems)
+            Cursor<JObject> AllGuilds = await R1.Db(_dbName).Table(_guildTableName).RunAsync<JObject>(_conn);
+            foreach (JObject guild in AllGuilds)
             {
                 Server Temp = _servers[guild["id"].Value<string>()];
                 AddToActives(Temp.Follows);
