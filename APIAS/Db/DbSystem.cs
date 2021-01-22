@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using APIAS.Abstracts;
 using APIAS.Data;
@@ -21,6 +18,8 @@ namespace APIAS.Db
         private const string _dbName = "ApiasDb";
 
         private const string _guildTableName = "Guilds";
+
+        private Dictionary<string, Server> _servers = new Dictionary<string, Server>();
 
         public DbSystem()
         {
@@ -51,6 +50,7 @@ namespace APIAS.Db
                     ServerName = guild.Name,
                     Follows = new List<AFollow>()
                 };
+                _servers.Add(GuildID, server);
 
                 await R1.Db(_dbName).Table(_guildTableName).Insert(server).RunAsync(_conn);
             }
@@ -61,40 +61,34 @@ namespace APIAS.Db
             var AllGuilds = await R1.Db(_dbName).Table(_guildTableName).RunAsync<JObject>(_conn);
             foreach (JObject guild in AllGuilds.BufferedItems)
             {
-                Server Temp = new Server(guild);
+                Server Temp = _servers[guild["id"].Value<string>()];
                 AddToActives(Temp.Follows);
             }
         }
 
         public async Task RemoveFollowAsync(AFollow follow, string GuildID)
         {
-            JObject GuildObject = await R1.Db(_dbName).Table(_guildTableName).Get(GuildID).RunAsync<JObject>(_conn);
-            Server Guild = new Server(GuildObject);
+            Server Guild = _servers[GuildID];
             Guild.Follows.Remove(follow);
             await R1.Db(_dbName).Table(_guildTableName).Update(Guild).RunAsync(_conn);
         }
 
         public async Task GetGuildAsync(string GuildID)
         {
-            JObject GuildObject = await R1.Db(_dbName).Table(_guildTableName).Get(GuildID).RunAsync<JObject>(_conn);
-            Server Guild = new Server(GuildObject);
+            Server Guild = _servers[GuildID];
             AddToActives(Guild.Follows);
         }
 
         public async Task AddFollowToGuildAsync(AFollow Follow, string GuildID)
         {
-            JObject GuildObject = await R1.Db(_dbName).Table(_guildTableName).Get(GuildID).RunAsync<JObject>(_conn);
-            Server Guild = new Server(GuildObject);
+            Server Guild = _servers[GuildID];
             Guild.Follows.AddUnique(Follow);
             await R1.Db(_dbName).Table(_guildTableName).Update(Guild).RunAsync(_conn);
         }
 
         public async Task UpdateFollowAsync(AFollow Follow)
         {
-            JObject GuildObject = await R1.Db(_dbName).Table(_guildTableName).Get(Follow.GuildID).RunAsync<JObject>(_conn);
-            Server Guild = new Server(GuildObject);
-            Guild.Follows.Remove(Guild.Follows.Where(x => x.FollowDbName == Follow.FollowDbName).FirstOrDefault());
-            Guild.Follows.AddUnique(Follow);
+            Server Guild = _servers[Follow.GuildID];
             await R1.Db(_dbName).Table(_guildTableName).Update(Guild).RunAsync(_conn);
         }
 
