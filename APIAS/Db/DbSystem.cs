@@ -78,10 +78,9 @@ namespace APIAS.Db
             await R1.Db(_dbName).Table(_guildTableName).Update(Guild).RunAsync(_conn);
         }
 
-        public async Task GetGuildAsync(string GuildID)
+        public void GetGuild(string GuildID)
         {
-            Server Guild = _servers[GuildID];
-            AddToActives(Guild.Follows);
+            AddToActives(_servers[GuildID].Follows);
         }
 
         public async Task AddFollowToGuildAsync(AFollow Follow, string GuildID)

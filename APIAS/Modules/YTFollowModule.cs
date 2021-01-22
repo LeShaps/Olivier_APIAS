@@ -67,7 +67,7 @@ namespace APIAS
         [Command("Fetch")]
         public async Task PullExistant()
         {
-            await Globals.Db.GetGuildAsync(Context.Guild.Id.ToString());
+            Globals.Db.GetGuild(Context.Guild.Id.ToString());
         }
 
         [Command("Deb")]
