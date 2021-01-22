@@ -72,7 +72,7 @@ namespace APIAS
 
         private async Task InitFollowsAsync()
         {
-            await Globals.Db.FetchGuilds();
+            await Globals.Db.FetchGuildsAsync();
         }
 
         private async Task CheckConfigReaction(Cacheable<IUserMessage, ulong> Message, ISocketMessageChannel Channel, SocketReaction Reaction)
@@ -85,19 +85,21 @@ namespace APIAS
 
             FollowUpdate.PendingReaction = Reaction;
 
-            await FollowUpdate.UseNextGate(Mess);
+            FollowUpdate.UseNextGate(Mess);
             if (FollowUpdate.IsFinished())
                 Globals.InConfigFollows.Remove(FollowUpdate);
         }
 
-        private async Task CheckConfigUpdate(SocketMessage arg)
+        private Task CheckConfigUpdate(SocketMessage arg)
         {
             AFollow FollowUpdate = Globals.InConfigFollows.Where(x => x.ConfigUserID() == arg.Author.Id).FirstOrDefault();
-            if (FollowUpdate == null) return;
+            if (FollowUpdate == null) return Task.CompletedTask;
 
-            await FollowUpdate.UseNextGate(arg);
+            FollowUpdate.UseNextGate(arg);
             if (FollowUpdate.IsFinished())
                 Globals.InConfigFollows.Remove(FollowUpdate);
+
+            return Task.CompletedTask;
         }
 
         private async Task InitGuildAsync(SocketGuild arg)

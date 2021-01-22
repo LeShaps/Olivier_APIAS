@@ -68,7 +68,7 @@ namespace APIAS.Db
         }
 
         /* Implementation */
-        public override async void CheckUpdate(object? obj)
+        public override async void CheckUpdate(object obj)
         {
             string RSSToRead = new WebClient().DownloadString(RssAdress);
             using var Reader = XmlReader.Create(new StringReader(RSSToRead));
@@ -86,7 +86,7 @@ namespace APIAS.Db
                 SetNewVideoInfos(post, RSSToRead);
                 _lastPublishID = post.Id;
                 await SendUpdateMessage();
-                await Globals.Db.UpdateFollow(this);
+                await Globals.Db.UpdateFollowAsync(this);
             }
         }
 
@@ -148,7 +148,7 @@ namespace APIAS.Db
                 new EmbedFieldBuilder
                 {
                     Name = "Description",
-                    Value = ChannelDescription.IsNullOrEmpty() ? "[No description found for this channel]" : ChannelDescription,
+                    Value = string.IsNullOrEmpty(ChannelDescription) ? "[No description found for this channel]" : ChannelDescription,
                     IsInline = false
                 }
             };
@@ -239,7 +239,7 @@ namespace APIAS.Db
         private async void Finish(IMessage MessageContext)
         {
             _mensionRoles = MessageContext.MentionedRoleIds.ToList();
-            _mensionRoles.AddRange(MessageContext.MentionedUserIds);
+            _mensionRoles.AddRangeUnique(MessageContext.MentionedUserIds);
 
             EmbedBuilder UpdateBuilder = _message.Embeds.First().ToEmbedBuilder();
 
@@ -257,7 +257,7 @@ namespace APIAS.Db
             Globals.ActiveFollows.AddUnique(this);
             Globals.InConfigFollows.Remove(this);
             string GID = (MessageContext.Channel as ITextChannel).GuildId.ToString();
-            await Globals.Db.AddFollowToGuild(this, GID);
+            await Globals.Db.AddFollowToGuildAsync(this, GID);
         }
 
         private void InitYoutubeInfos(string ChannelUrl)

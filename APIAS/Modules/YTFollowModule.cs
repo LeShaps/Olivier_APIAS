@@ -2,7 +2,6 @@
 
 using System.Linq;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 using APIAS.Db;
@@ -28,7 +27,7 @@ namespace APIAS
         public async Task CancelConfiguration()
         {
             if (Globals.InConfigFollows.Where(x => x.ConfigUserID() == Context.User.Id).FirstOrDefault() is YTFollow Follow)
-                await Follow.CancelConfiguration();
+                await Follow.CancelConfigurationAsync();
             else
                 await ReplyAsync("You don't configure any follow at the moment");
         }
@@ -55,7 +54,7 @@ namespace APIAS
             foreach (AFollow follow in YTFollows)
             {
                 if (((YTFollow)follow).ChannelName == ChannelName) {
-                    await follow.RemoveSubscription();
+                    await follow.RemoveSubscriptionAsync();
                     await ReplyAsync($"You've successfully unfollowed {ChannelName}!");
                     return;
                 }
@@ -68,7 +67,7 @@ namespace APIAS
         [Command("Fetch")]
         public async Task PullExistant()
         {
-            await Globals.Db.GetGuildAysnc(Context.Guild.Id.ToString());
+            Globals.Db.GetGuild(Context.Guild.Id.ToString());
         }
 
         [Command("Deb")]

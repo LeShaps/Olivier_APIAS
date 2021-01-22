@@ -28,14 +28,7 @@ namespace APIAS.Utilities
 
         public static Emoji[] MakeEmojiArray(params string[] Emojis)
         {
-            List<Emoji> EmojisList = new List<Emoji>();
-
-            foreach (string s in Emojis)
-            {
-                EmojisList.Add(new Emoji(s));
-            }
-
-            return EmojisList.ToArray();
+            return Emojis.Select(x => new Emoji(x)).ToArray();
         }
     }
 }

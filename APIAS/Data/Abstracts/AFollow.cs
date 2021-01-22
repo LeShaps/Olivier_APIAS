@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 
 using APIAS.Data;
+using System.Linq;
+using APIAS.Extensions;
 
 namespace APIAS.Abstracts
 {
@@ -47,45 +49,20 @@ namespace APIAS.Abstracts
             => _isConfigFinished;
 
         private List<string> GetMentionChannels()
-        {
-            List<string> ChannelsIDs = new List<string>();
-
-            foreach (IGuildChannel chan in _mensionChannels)
-            {
-                ChannelsIDs.Add(chan.Id.ToString());
-            }
-
-            return ChannelsIDs;
-        }
+            => _mensionChannels.Select(x => x.Id.ToString()).ToList();
 
         private List<string> GetMentionRoles()
-        {
-            List<string> RolesIDs = new List<string>();
+            => _mensionRoles.Select(x => x.ToString()).ToList();
 
-            foreach (ulong role in _mensionRoles)
-            {
-                RolesIDs.Add(role.ToString());
-            }
-
-            return RolesIDs;
-        }
-
-        public async void SetMensionChannels(List<string> Channels)
+        public void SetMensionChannels(List<string> Channels)
         {
             IGuild guild = Globals.Client.GetGuild(ulong.Parse(GuildID));
-            foreach (string chanId in Channels)
-            {
-                ITextChannel Channel = await guild.GetTextChannelAsync(ulong.Parse(chanId));
-                _mensionChannels.Add(Channel);
-            }
+            _mensionChannels.AddRangeUnique(Channels.Select(async x => await guild.GetTextChannelAsync(ulong.Parse(x))).Select(x => x.Result));
         }
 
         public void SetMentionRoles(List<string> Roles)
         {
-            foreach (string role in Roles)
-            {
-                _mensionRoles.Add(ulong.Parse(role));
-            }
+            _mensionRoles.AddRangeUnique(Roles.Select(x => ulong.Parse(x)));
         }
 
         /// <summary>
@@ -102,7 +79,7 @@ namespace APIAS.Abstracts
         /// </summary>
         /// <param name="ConfigMessage"></param>
         /// <returns></returns>
-        public async Task UseNextGate(IMessage ConfigMessage)
+        public void UseNextGate(IMessage ConfigMessage)
         {
             _gates[_configurationGate](ConfigMessage);
         }
@@ -110,7 +87,7 @@ namespace APIAS.Abstracts
         /// <summary>
         /// Cancel current configuration and remove it from the configuration list
         /// </summary>
-        public async Task CancelConfiguration()
+        public async Task CancelConfigurationAsync()
         {
             _isConfigFinished = true;
             Globals.InConfigFollows.Remove(this);
@@ -125,17 +102,17 @@ namespace APIAS.Abstracts
             await _message.ModifyAsync(x => x.Embed = CancelEmbed.Build());
         }
 
-        public async Task RemoveSubscription()
+        public async Task RemoveSubscriptionAsync()
         {
             Globals.ActiveFollows.Remove(this);
-            await Globals.Db.RemoveFollow(this, GuildID);
+            await Globals.Db.RemoveFollowAsync(this, GuildID);
         }
 
         /// <summary>
         /// Specific update checker
         /// </summary>
         /// <returns></returns>
-        public abstract void CheckUpdate(object? obj);
+        public abstract void CheckUpdate(object obj);
 
         /// <summary>
         /// Send message to notify update
