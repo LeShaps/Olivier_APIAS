@@ -239,7 +239,7 @@ namespace APIAS.Db
         private async void Finish(IMessage MessageContext)
         {
             _mensionRoles = MessageContext.MentionedRoleIds.ToList();
-            _mensionRoles.AddRange(MessageContext.MentionedUserIds);
+            _mensionRoles.AddRangeUnique(MessageContext.MentionedUserIds);
 
             EmbedBuilder UpdateBuilder = _message.Embeds.First().ToEmbedBuilder();
 

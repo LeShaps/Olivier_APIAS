@@ -7,6 +7,7 @@ using System.Collections.Generic;
 
 using APIAS.Data;
 using System.Linq;
+using APIAS.Extensions;
 
 namespace APIAS.Abstracts
 {
@@ -56,12 +57,12 @@ namespace APIAS.Abstracts
         public void SetMensionChannels(List<string> Channels)
         {
             IGuild guild = Globals.Client.GetGuild(ulong.Parse(GuildID));
-            _mensionChannels.AddRange(Channels.Select(async x => await guild.GetTextChannelAsync(ulong.Parse(x))).Select(x => x.Result));
+            _mensionChannels.AddRangeUnique(Channels.Select(async x => await guild.GetTextChannelAsync(ulong.Parse(x))).Select(x => x.Result));
         }
 
         public void SetMentionRoles(List<string> Roles)
         {
-            _mensionRoles.AddRange(Roles.Select(x => ulong.Parse(x)));
+            _mensionRoles.AddRangeUnique(Roles.Select(x => ulong.Parse(x)));
         }
 
         /// <summary>
