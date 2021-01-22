@@ -8,11 +8,8 @@ namespace APIAS.Extensions
         public static bool AddUnique<T>(this IList<T> List, T newItem)
             where T : IEquatable<T>
         {
-            foreach (T item in List)
-            {
-                if (item.Equals(newItem))
-                    return false;
-            }
+            if (List.Contains(newItem))
+                return false;
 
             List.Add(newItem);
             return true;

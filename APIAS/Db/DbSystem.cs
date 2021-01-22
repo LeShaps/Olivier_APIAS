@@ -56,7 +56,7 @@ namespace APIAS.Db
             }
         }
 
-        public async Task FetchGuilds()
+        public async Task FetchGuildsAsync()
         {
             var AllGuilds = await R1.Db(_dbName).Table(_guildTableName).RunAsync<JObject>(_conn);
             foreach (JObject guild in AllGuilds.BufferedItems)
@@ -66,7 +66,7 @@ namespace APIAS.Db
             }
         }
 
-        public async Task RemoveFollow(AFollow follow, string GuildID)
+        public async Task RemoveFollowAsync(AFollow follow, string GuildID)
         {
             JObject GuildObject = await R1.Db(_dbName).Table(_guildTableName).Get(GuildID).RunAsync<JObject>(_conn);
             Server Guild = new Server(GuildObject);
@@ -74,14 +74,14 @@ namespace APIAS.Db
             await R1.Db(_dbName).Table(_guildTableName).Update(Guild).RunAsync(_conn);
         }
 
-        public async Task GetGuildAysnc(string GuildID)
+        public async Task GetGuildAsync(string GuildID)
         {
             JObject GuildObject = await R1.Db(_dbName).Table(_guildTableName).Get(GuildID).RunAsync<JObject>(_conn);
             Server Guild = new Server(GuildObject);
             AddToActives(Guild.Follows);
         }
 
-        public async Task AddFollowToGuild(AFollow Follow, string GuildID)
+        public async Task AddFollowToGuildAsync(AFollow Follow, string GuildID)
         {
             JObject GuildObject = await R1.Db(_dbName).Table(_guildTableName).Get(GuildID).RunAsync<JObject>(_conn);
             Server Guild = new Server(GuildObject);
@@ -89,7 +89,7 @@ namespace APIAS.Db
             await R1.Db(_dbName).Table(_guildTableName).Update(Guild).RunAsync(_conn);
         }
 
-        public async Task UpdateFollow(AFollow Follow)
+        public async Task UpdateFollowAsync(AFollow Follow)
         {
             JObject GuildObject = await R1.Db(_dbName).Table(_guildTableName).Get(Follow.GuildID).RunAsync<JObject>(_conn);
             Server Guild = new Server(GuildObject);
