@@ -47,6 +47,7 @@ namespace APIAS.Data
     public enum FollowType
     {
         Youtube,
-        Itch
+        Itch,
+        GameJolt
     }
 }

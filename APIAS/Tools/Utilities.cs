@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 
 using Discord;
+using System;
 
 namespace APIAS.Utilities
 {
@@ -26,9 +27,21 @@ namespace APIAS.Utilities
             return FinalJson.Value<T>(ValueName);
         }
 
+        public static T JsonWalker<T, U>(JObject OriginalJson, string Path, Func<U, T> Processing)
+        {
+            U UsableValue = JsonWalker<U>(OriginalJson, Path);
+            return Processing(UsableValue);
+        }
+
         public static Emoji[] MakeEmojiArray(params string[] Emojis)
         {
             return Emojis.Select(x => new Emoji(x)).ToArray();
         }
+
+        public static DateTime DateTimeFromUnixEpoch(long Time)
+            => DateTimeOffset.FromUnixTimeMilliseconds(Time).UtcDateTime;
+
+        public static Color ColorFromHex(string Hex)
+            => new Color(uint.Parse(Hex, System.Globalization.NumberStyles.HexNumber));
     }
 }

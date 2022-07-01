@@ -18,12 +18,14 @@ namespace APIAS.Abstracts
         protected int _configurationGate;
         protected List<ConfigurationUpdater> _gates;
         protected bool _isConfigFinished;
+        protected bool _isWaitingForReaction;
         protected IUserMessage _message;
         protected IReaction _pendingReaction;
         protected IGuild _configurationGuild;
 
         /* Properties */
         public IReaction PendingReaction { set => _pendingReaction = value; }
+        public bool IsWaitingForReaction { get => _isWaitingForReaction; }
         public List<string> MentionChannels { get => GetMentionChannels(); set => SetMensionChannels(value); }
         public List<string> MentionRoles { get => GetMentionRoles(); set => SetMentionRoles(value); }
         public string CreatorUserID { get => _configUserID.ToString(); set => _configUserID = ulong.Parse(value); }
@@ -87,7 +89,7 @@ namespace APIAS.Abstracts
         /// <summary>
         /// Cancel current configuration and remove it from the configuration list
         /// </summary>
-        public async Task CancelConfigurationAsync()
+        public async Task CancelConfigurationAsync(string Message = null)
         {
             _isConfigFinished = true;
             Globals.InConfigFollows.Remove(this);
@@ -96,7 +98,7 @@ namespace APIAS.Abstracts
             {
                 Title = "Configuration canceled",
                 Color = Color.DarkRed,
-                Description = "Configuration canceled by user"
+                Description = $"Configuration canceled: {Message ?? "Canceled by user"}"
             };
 
             await _message.ModifyAsync(x => x.Embed = CancelEmbed.Build());

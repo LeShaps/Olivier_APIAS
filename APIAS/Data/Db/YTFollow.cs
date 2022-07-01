@@ -148,7 +148,7 @@ namespace APIAS.Db
                 new EmbedFieldBuilder
                 {
                     Name = "Description",
-                    Value = string.IsNullOrEmpty(ChannelDescription) ? "[No description found for this channel]" : ChannelDescription,
+                    Value = string.IsNullOrEmpty(ChannelDescription) || string.IsNullOrWhiteSpace(ChannelDescription) ? "[No description found for this channel]" : ChannelDescription,
                     IsInline = false
                 }
             };
@@ -157,11 +157,15 @@ namespace APIAS.Db
 
             await _message.ModifyAsync(x => x.Embed = UpdateBuilder.Build());
             await _message.AddReactionsAsync(Utilities.Utilities.MakeEmojiArray("✅", "🚫"));
+            _isWaitingForReaction = true;
             _configurationGate++;
         }
 
         private async void SetupFrequency(IMessage MessageContext)
         {
+            if (!Utilities.Utilities.MakeEmojiArray("✅", "🚫").Contains(_pendingReaction.Emote))
+                return;
+
             await _message.RemoveAllReactionsAsync();
             EmbedBuilder UpdateBuilder = _message.Embeds.First().ToEmbedBuilder();
 
@@ -189,13 +193,25 @@ namespace APIAS.Db
                 $"5. Every 10 minutes\n" +
                 $"6. Custom\n\nNote: this doesn't have any consequences for the moment";
 
+            if (Globals.ActiveFollows.Any(x => x.FollowDbName == FollowDbName)) {
+                await CancelConfigurationAsync("You already follow a channel at this Url on this server");
+                return;
+            }
+
             await _message.ModifyAsync(x => x.Embed = UpdateBuilder.Build());
             await _message.AddReactionsAsync(Utilities.Utilities.MakeEmojiArray("1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣"));
+            _pendingReaction = null;
             _configurationGate++;
         }
 
         private async void SetupFollowChannel(IMessage MessageContext)
         {
+            if (_pendingReaction == null)
+                return;
+
+            if (!Utilities.Utilities.MakeEmojiArray("1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣").Contains(_pendingReaction.Emote))
+                return;
+
             RefreshTime = _pendingReaction.Emote.Name switch
             {
                 "1️⃣" => 24 * ((1000 * 60) * 60),
@@ -213,6 +229,7 @@ namespace APIAS.Db
             UpdateBuilder.Description = "In which channel would you want to see the news?";
 
             await _message.ModifyAsync(x => x.Embed = UpdateBuilder.Build());
+            _isWaitingForReaction = false;
             _configurationGate++;
         }
 

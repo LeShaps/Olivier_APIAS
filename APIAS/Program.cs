@@ -95,6 +95,7 @@ namespace APIAS
             AFollow FollowUpdate = Globals.InConfigFollows.Where(x => x.ConfigUserID() == arg.Author.Id).FirstOrDefault();
             if (FollowUpdate == null) return Task.CompletedTask;
 
+            if (FollowUpdate.IsWaitingForReaction) return Task.CompletedTask;
             FollowUpdate.UseNextGate(arg);
             if (FollowUpdate.IsFinished())
                 Globals.InConfigFollows.Remove(FollowUpdate);
